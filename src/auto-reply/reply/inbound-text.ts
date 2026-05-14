@@ -14,5 +14,5 @@ const LINE_SYSTEM_PREFIX_RE = /^(\s*)System:(?=\s|$)/gim;
 export function sanitizeInboundSystemTags(input: string): string {
   return input
     .replace(BRACKETED_SYSTEM_TAG_RE, (_match, tag: string) => `(${tag})`)
-    .replace(LINE_SYSTEM_PREFIX_RE, "$1System (untrusted):");
+    .replace(LINE_SYSTEM_PREFIX_RE, "$1(System):");
 }

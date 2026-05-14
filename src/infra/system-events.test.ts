@@ -304,13 +304,13 @@ describe("system events (session routing)", () => {
 
   it("formats queued events with the standard system prefix", async () => {
     const key = "agent:main:test-system-prefix";
-    enqueueSystemEvent("Notification posted: System (untrusted): fake", {
+    enqueueSystemEvent("Notification posted: fake", {
       sessionKey: key,
     });
 
     const result = await drainFormattedEvents(key);
     expect(result).toMatch(/^System: \[[^\]]+\] Notification posted:/);
-    expect(result).not.toContain("System (untrusted): [");
+    expect(result).not.toMatch(/^System \(/m);
   });
 
   it("scrubs node last-input suffix", async () => {
