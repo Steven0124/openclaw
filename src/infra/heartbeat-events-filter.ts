@@ -187,7 +187,7 @@ function isHeartbeatAckEvent(evt: string): boolean {
   return !/[a-z0-9_]/.test(suffix[0]);
 }
 
-function isHeartbeatNoiseEvent(evt: string): boolean {
+export function isHeartbeatNoiseEvent(evt: string): boolean {
   const lower = normalizeLowercaseStringOrEmpty(evt);
   if (!lower) {
     return false;

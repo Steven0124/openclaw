@@ -403,9 +403,7 @@ export async function runPreparedReply(
   } = params;
   const isHeartbeat = opts?.isHeartbeat === true;
   const forceSenderIsOwnerFalseForSystemEventRun =
-    isHeartbeat ||
-    isSystemEventProvider(ctx.Provider) ||
-    isSystemEventProvider(sessionCtx.Provider);
+    ctx.ForceSenderIsOwnerFalse === true || sessionCtx.ForceSenderIsOwnerFalse === true;
   const traceAttributes = {
     provider,
     hasSessionKey: Boolean(sessionKey),
@@ -706,7 +704,7 @@ export async function runPreparedReply(
       });
       if (eventsBlock) {
         drainedSystemEventBlocks.push(eventsBlock.text);
-        if (eventsBlock.hasQueuedEvents) {
+        if (!isHeartbeat && eventsBlock.hasQueuedEvents) {
           forceSenderIsOwnerFalseFromQueuedSystemEvents = true;
         }
       }

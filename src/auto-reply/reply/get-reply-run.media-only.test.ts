@@ -1649,7 +1649,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(call?.followupRun.run.senderIsOwner).toBe(false);
   });
 
-  it("downgrades sender ownership for heartbeat-originated system event runs", async () => {
+  it("keeps heartbeat sender ownership without an explicit downgrade flag", async () => {
     vi.mocked(drainFormattedSystemEventBlock).mockResolvedValueOnce({
       text: "System: [t] External webhook payload.",
       hasQueuedEvents: true,
@@ -1659,6 +1659,23 @@ describe("runPreparedReply media-only handling", () => {
     await runPreparedReply({
       ...params,
       opts: { ...params.opts, isHeartbeat: true },
+    });
+
+    const call = requireRunReplyAgentCall();
+    expect(call?.followupRun.run.senderIsOwner).toBe(true);
+  });
+
+  it("downgrades heartbeat sender ownership with an explicit downgrade flag", async () => {
+    vi.mocked(drainFormattedSystemEventBlock).mockResolvedValueOnce({
+      text: "System: [t] External webhook payload.",
+      hasQueuedEvents: true,
+    });
+    const params = ownerParams();
+
+    await runPreparedReply({
+      ...params,
+      opts: { ...params.opts, isHeartbeat: true },
+      ctx: { ...params.ctx, ForceSenderIsOwnerFalse: true },
     });
 
     const call = requireRunReplyAgentCall();

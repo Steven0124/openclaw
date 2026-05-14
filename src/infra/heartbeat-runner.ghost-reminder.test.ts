@@ -272,6 +272,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
     expect(result.status).toBe("ran");
     expect(replyCallCount).toBe(1);
     expect(calledCtx?.Provider).toBe("heartbeat");
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(false);
     expect(calledCtx?.Body).not.toContain("scheduled reminder has been triggered");
     expect(calledCtx?.Body).not.toContain("relay this reminder");
     expect(sendTelegram).toHaveBeenCalled();
@@ -317,6 +318,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
     expect(result.status).toBe("ran");
     expect(replyCallCount).toBe(1);
     expect(calledCtx?.Provider).toBe("cron-event");
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(false);
     expect(calledCtx?.Body).toContain("scheduled reminder has been triggered");
     expect(calledCtx?.Body).toContain("Cron: QMD maintenance completed");
     expect(calledCtx?.Body).not.toContain("Read HEARTBEAT.md");
@@ -366,12 +368,14 @@ describe("Ghost reminder bug (issue #13317)", () => {
       const firstCtx = mockCallAt(getReplySpy, 0, "first heartbeat reply")[0] as {
         Provider?: string;
         Body?: string;
+        ForceSenderIsOwnerFalse?: boolean;
       };
       const secondCtx = mockCallAt(getReplySpy, 1, "second heartbeat reply")[0] as {
         Provider?: string;
         Body?: string;
       };
       expect(firstCtx.Provider).toBe("cron-event");
+      expect(firstCtx.ForceSenderIsOwnerFalse).toBe(false);
       expect(firstCtx.Body).toContain("Cron: QMD maintenance completed");
       expect(secondCtx.Provider).toBe("heartbeat");
       expect(secondCtx.Body).toContain("Read HEARTBEAT.md");
@@ -392,6 +396,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
     expect(result.status).toBe("ran");
     expect(calledCtx?.Provider).toBe("cron-event");
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(false);
     expect(calledCtx?.Body).toContain("Handle this reminder internally");
     expect(sendTelegram).not.toHaveBeenCalled();
   });
