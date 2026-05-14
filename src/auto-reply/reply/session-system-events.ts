@@ -27,7 +27,7 @@ const selectGenericSystemEvents = (events: readonly SystemEvent[]): SystemEvent[
   return selected;
 };
 
-const OWNER_SAFE_CONTEXT_PREFIXES = ["model:", "fast:", "elevated:", "reasoning:", "queue:"];
+const OWNER_SAFE_CONTEXT_PREFIXES = ["model:", "model-runtime:", "fast:", "mode:", "queue:"];
 
 function requiresOwnerDowngradeForQueuedEvent(event: SystemEvent): boolean {
   if (event.deliveryContext) {

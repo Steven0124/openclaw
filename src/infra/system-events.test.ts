@@ -346,6 +346,14 @@ describe("system events (session routing)", () => {
       sessionKey: key,
       contextKey: "model:gpt-5.5",
     });
+    enqueueSystemEvent("Elevated mode FULL.", {
+      sessionKey: key,
+      contextKey: "mode:elevated",
+    });
+    enqueueSystemEvent("Model runtime openai/claude-cli ignored.", {
+      sessionKey: key,
+      contextKey: "model-runtime:openai:claude-cli",
+    });
     enqueueSystemEvent("Post-compaction context:\nnotes", { sessionKey: key });
 
     const result = await drainFormattedEventBlock(key);
