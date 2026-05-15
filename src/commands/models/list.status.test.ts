@@ -152,7 +152,7 @@ const mocks = vi.hoisted(() => {
         mode: "scoped",
         allowKeychainPrompt: false,
         config: cfg,
-        providerIds: [...new Set(providerIds)].sort(),
+        providerIds: [...new Set(providerIds)].toSorted(),
         profileIds,
       };
     }),
