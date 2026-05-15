@@ -1147,7 +1147,9 @@ function resolveHeartbeatRunPrompt(params: {
 
   if (params.commitmentOnly) {
     return {
-      prompt: commitmentPrompt,
+      prompt: commitmentPrompt
+        ? appendHeartbeatFileDirectives(commitmentPrompt, params.heartbeatFileContent)
+        : null,
       hasExecCompletion: false,
       hasRelayableExecCompletion: false,
       hasCronEvents: false,
