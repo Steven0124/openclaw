@@ -1592,6 +1592,9 @@ export async function runHeartbeatOnce(opts: {
     MessageThreadId: delivery.threadId,
     Provider: hasExecCompletion ? "exec-event" : hasCronEvents ? "cron-event" : "heartbeat",
     SessionKey: runSessionKey,
+    // Exec completion turns are explicit event-triggered non-owner runs. This is
+    // independent of queued system-event trust metadata, which is no longer read.
+    ...(hasExecCompletion ? { ForceSenderIsOwnerFalse: true } : {}),
   };
   if (!visibility.showAlerts && !visibility.showOk && !visibility.useIndicator) {
     emitHeartbeatEvent({

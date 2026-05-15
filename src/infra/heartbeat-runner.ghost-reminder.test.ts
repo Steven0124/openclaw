@@ -413,7 +413,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
     expect(result.status).toBe("ran");
     expect(calledCtx?.Provider).toBe("exec-event");
-    expect(calledCtx?.ForceSenderIsOwnerFalse).toBeUndefined();
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(true);
     expect(calledCtx?.Body).toContain("Handle the result internally");
     expect(sendTelegram).not.toHaveBeenCalled();
   });
@@ -430,7 +430,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
     expect(result.status).toBe("ran");
     expect(calledCtx?.Provider).toBe("exec-event");
-    expect(calledCtx?.ForceSenderIsOwnerFalse).toBeUndefined();
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(true);
     expect(calledCtx?.Body).toContain("exec finished: deploy succeeded");
     expect(sendTelegram).toHaveBeenCalled();
   });
@@ -468,7 +468,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
     expect(result.status).toBe("ran");
     expect(calledCtx?.Provider).toBe("exec-event");
-    expect(calledCtx?.ForceSenderIsOwnerFalse).toBeUndefined();
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(true);
     expect(calledCtx?.Body).toContain("Handle the result internally");
     expect(sendTelegram).not.toHaveBeenCalled();
   });
