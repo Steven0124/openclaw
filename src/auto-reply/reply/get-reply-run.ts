@@ -71,7 +71,7 @@ import { resolveQueueSettings } from "./queue/settings-runtime.js";
 import { resolveRuntimePolicySessionKey } from "./runtime-policy-session-key.js";
 import { resolveBareSessionResetPromptState } from "./session-reset-prompt.js";
 import { resolveBareResetBootstrapFileAccess } from "./session-reset-prompt.js";
-import { drainFormattedSystemEventBlock } from "./session-system-events.js";
+import { drainFormattedSystemEvents } from "./session-system-events.js";
 import { buildSessionStartupContextPrelude, shouldApplyStartupContext } from "./startup-context.js";
 import { resolveTypingMode } from "./typing-mode.js";
 import { resolveRunTypingPolicy } from "./typing-policy.js";
@@ -402,8 +402,6 @@ export async function runPreparedReply(
     abortedLastRun,
   } = params;
   const isHeartbeat = opts?.isHeartbeat === true;
-  const forceSenderIsOwnerFalseForSystemEventRun =
-    ctx.ForceSenderIsOwnerFalse === true || sessionCtx.ForceSenderIsOwnerFalse === true;
   const traceAttributes = {
     provider,
     hasSessionKey: Boolean(sessionKey),
@@ -695,14 +693,14 @@ export async function runPreparedReply(
     currentTurnContext?: typeof promptEnvelopeBase.currentTurnContext;
   }> => {
     if (!useFastReplyRuntime) {
-      const eventsBlock = await drainFormattedSystemEventBlock({
+      const eventsBlock = await drainFormattedSystemEvents({
         cfg,
         sessionKey,
         isMainSession,
         isNewSession,
       });
       if (eventsBlock) {
-        drainedSystemEventBlocks.push(eventsBlock.text);
+        drainedSystemEventBlocks.push(eventsBlock);
       }
     }
     return buildReplyPromptEnvelope({
@@ -999,10 +997,9 @@ export async function runPreparedReply(
       senderName: normalizeOptionalString(sessionCtx.SenderName),
       senderUsername: normalizeOptionalString(sessionCtx.SenderUsername),
       senderE164: normalizeOptionalString(sessionCtx.SenderE164),
-      senderIsOwner: forceSenderIsOwnerFalseForSystemEventRun ? false : command.senderIsOwner,
+      senderIsOwner: command.senderIsOwner,
       traceAuthorized:
-        (forceSenderIsOwnerFalseForSystemEventRun ? false : command.senderIsOwner) ||
-        (ctx.GatewayClientScopes ?? []).includes("operator.admin"),
+        command.senderIsOwner || (ctx.GatewayClientScopes ?? []).includes("operator.admin"),
       sessionFile: preparedSessionState.sessionFile,
       workspaceDir,
       config: cfg,
