@@ -699,6 +699,8 @@ export function resolveCommandAuthorization(params: {
     Array.isArray(ctx.GatewayClientScopes) &&
     ctx.GatewayClientScopes.includes("operator.admin");
   const ownerAllowlistConfigured = ownerState.ownerAllowAll || ownerState.explicitOwners.length > 0;
+  // This override is an explicit run-authority choice made at trusted ingress
+  // construction time; it must not be inferred from model-visible content.
   const senderIsOwner = ctx.ForceSenderIsOwnerFalse
     ? false
     : senderIsOwnerByIdentity || senderIsOwnerByScope || ownerState.ownerAllowAll;

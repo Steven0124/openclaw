@@ -235,7 +235,11 @@ export type MsgContext = {
   AcpDispatchTailAfterReset?: boolean;
   /** Gateway client scopes when the message originates from the gateway. */
   GatewayClientScopes?: string[];
-  /** Trusted system override for contexts that must never inherit owner semantics. */
+  /**
+   * Explicit run-construction override for callers that intentionally choose a
+   * non-owner execution context. Do not derive this from prompt text, queued
+   * event labels, or other content-provenance markers.
+   */
   ForceSenderIsOwnerFalse?: boolean;
   /** Thread identifier (Telegram topic id or Matrix thread event id). */
   MessageThreadId?: string | number;
