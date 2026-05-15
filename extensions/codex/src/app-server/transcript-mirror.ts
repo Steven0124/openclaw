@@ -5,7 +5,6 @@ import {
   runAgentHarnessBeforeMessageWriteHook,
   type AgentMessage,
   type EmbeddedRunAttemptParams,
-  type SessionWriteLockAcquireTimeoutConfig,
 } from "openclaw/plugin-sdk/agent-harness-runtime";
 
 const DEFAULT_AGENT_ID = "main";

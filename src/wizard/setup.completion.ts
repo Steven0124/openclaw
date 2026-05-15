@@ -82,17 +82,6 @@ export async function setupWizardShellCompletion(params: {
       return;
     }
 
-    // Generate cache first (required for fast shell startup)
-    const cacheGenerated = await deps.ensureCompletionCacheExists(cliName);
-    if (!cacheGenerated) {
-      await params.prompter.note(
-        t("wizard.completion.cacheFailed", { command: `${cliName} completion --install` }),
-        t("wizard.completion.title"),
-      );
-      return;
-    }
-
-    // Install to shell profile
     await deps.installCompletion(completionStatus.shell, true, cliName);
 
     const profileHint = await resolveProfileHint(completionStatus.shell);

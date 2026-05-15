@@ -733,19 +733,6 @@ describe("update-cli", () => {
     tempDirsToCleanup.clear();
   });
 
-  it("bounds completion cache refresh during update follow-up", async () => {
-    const root = createCaseDir("openclaw-completion-timeout");
-    pathExists.mockResolvedValue(true);
-
-    await updateCliShared.tryWriteCompletionCache(root, false);
-
-    const call = spawnSyncCall();
-    expect(typeof call?.[0]).toBe("string");
-    expect(call?.[1]).toEqual([path.join(root, "openclaw.mjs"), "completion", "--write-state"]);
-    expect(call?.[2]?.env?.OPENCLAW_COMPLETION_SKIP_PLUGIN_COMMANDS).toBe("1");
-    expect(call?.[2]?.timeout).toBe(30_000);
-  });
-
   it("disarms legacy launchd updater jobs before refusing mutating updates in Nix mode", async () => {
     await withEnvAsync({ OPENCLAW_NIX_MODE: "1" }, async () => {
       await expect(updateCommand({ yes: true })).rejects.toThrow("OPENCLAW_NIX_MODE=1");

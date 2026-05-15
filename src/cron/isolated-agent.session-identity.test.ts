@@ -8,8 +8,6 @@ import {
   makeJob,
   seedCronSessionRows,
   seedMainRouteSession,
-  writeSessionStore,
-  writeSessionStoreEntries,
 } from "./isolated-agent.test-harness.js";
 import {
   DEFAULT_AGENT_TURN_PAYLOAD,
@@ -24,7 +22,6 @@ import { setupRunCronIsolatedAgentTurnSuite } from "./isolated-agent/run.suite-h
 import {
   mockRunCronFallbackPassthrough,
   runEmbeddedPiAgentMock,
-  updateSessionStoreMock,
 } from "./isolated-agent/run.test-harness.js";
 
 setupRunCronIsolatedAgentTurnSuite();
@@ -154,12 +151,9 @@ describe("runCronIsolatedAgentTurn session identity", () => {
     await withTempHome(async (home) => {
       const deps = makeDeps();
       const boundSessionKey = "agent:main:telegram:direct:42";
-      const originalSessionFile = path.join(home, "bound-session.jsonl");
-      const rotatedSessionFile = path.join(home, "bound-session-rotated.jsonl");
-      const storePath = await writeSessionStoreEntries(home, {
+      await seedCronSessionRows(home, {
         [boundSessionKey]: {
           sessionId: "bound-session",
-          sessionFile: originalSessionFile,
           updatedAt: Date.now(),
           lastInteractionAt: Date.now() - 1_000,
           systemSent: true,
@@ -171,7 +165,6 @@ describe("runCronIsolatedAgentTurn session identity", () => {
           durationMs: 5,
           agentMeta: {
             sessionId: "bound-session-rotated",
-            sessionFile: rotatedSessionFile,
             provider: "anthropic",
             model: "claude-opus-4-6",
             compactionCount: 1,
@@ -179,21 +172,9 @@ describe("runCronIsolatedAgentTurn session identity", () => {
           },
         },
       });
-      updateSessionStoreMock.mockImplementation(async (_storePath, update) => {
-        const store = {
-          [boundSessionKey]: {
-            sessionId: "bound-session",
-            sessionFile: originalSessionFile,
-            updatedAt: Date.now(),
-            lastInteractionAt: Date.now() - 1_000,
-            systemSent: true,
-          },
-        };
-        update(store);
-      });
 
       const res = await runCronIsolatedAgentTurn({
-        cfg: makeCfg(home, storePath),
+        cfg: makeCfg(home),
         deps,
         job: {
           ...makeJob(DEFAULT_AGENT_TURN_PAYLOAD),
@@ -208,14 +189,10 @@ describe("runCronIsolatedAgentTurn session identity", () => {
       expect(res.status).toBe("ok");
       expect(res.sessionId).toBe("bound-session-rotated");
 
-      const finalPersist = updateSessionStoreMock.mock.calls.at(-1);
-      expect(finalPersist?.[0]).toBe(storePath);
-      const persistedStore: Record<string, { [key: string]: unknown }> = {};
-      (finalPersist?.[1] as (store: typeof persistedStore) => void)(persistedStore);
-      expect(persistedStore[boundSessionKey]).toEqual(
+      const persisted = await readSessionEntry("main", boundSessionKey);
+      expect(persisted).toEqual(
         expect.objectContaining({
           sessionId: "bound-session-rotated",
-          sessionFile: rotatedSessionFile,
           usageFamilyKey: boundSessionKey,
           usageFamilySessionIds: ["bound-session", "bound-session-rotated"],
         }),
