@@ -1108,6 +1108,10 @@ describe("discord DM reaction handling", () => {
       expect(requireRecord(opts, "system event options").sessionKey, testCase.name).toBe(
         "discord:acc-1:dm:user-1",
       );
+      expect(
+        requireRecord(opts, "system event options").forceSenderIsOwnerFalse,
+        testCase.name,
+      ).toBe(true);
     }
   });
 

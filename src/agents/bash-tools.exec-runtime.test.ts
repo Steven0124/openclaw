@@ -443,6 +443,7 @@ describe("exec notifyOnExit suppression", () => {
     const [message, options] = requireSystemEventCall();
     expect(message).toContain("partial output");
     expect(options.sessionKey).toBe("agent:main:main");
+    expect(options.forceSenderIsOwnerFalse).toBe(true);
     expect(requestHeartbeatMock).toHaveBeenCalledTimes(1);
     const heartbeat = requireHeartbeatCall();
     expect(heartbeat.coalesceMs).toBe(0);
@@ -456,6 +457,7 @@ describe("exec notifyOnExit suppression", () => {
     const [message, options] = requireSystemEventCall();
     expect(message).toContain("Exec failed");
     expect(options.sessionKey).toBe("agent:main:main");
+    expect(options.forceSenderIsOwnerFalse).toBe(true);
     expect(requestHeartbeatMock).toHaveBeenCalledTimes(1);
     const heartbeat = requireHeartbeatCall();
     expect(heartbeat.coalesceMs).toBe(0);
@@ -489,6 +491,7 @@ describe("emitExecSystemEvent", () => {
         to: "telegram:-100123:topic:47",
         threadId: 47,
       },
+      forceSenderIsOwnerFalse: true,
     });
     const heartbeat = requireHeartbeatCall();
     expect(heartbeat.coalesceMs).toBe(0);
@@ -506,6 +509,7 @@ describe("emitExecSystemEvent", () => {
     expect(enqueueSystemEventMock).toHaveBeenCalledWith("Exec finished", {
       sessionKey: "agent:ops:primary",
       contextKey: "exec:run-cron",
+      forceSenderIsOwnerFalse: true,
     });
     expect(requestHeartbeatMock).toHaveBeenCalledTimes(1);
     const [[heartbeatParams]] = requestHeartbeatMock.mock.calls as unknown as Array<
@@ -526,6 +530,7 @@ describe("emitExecSystemEvent", () => {
     expect(enqueueSystemEventMock).toHaveBeenCalledWith("Exec finished", {
       sessionKey: "global",
       contextKey: "exec:run-global",
+      forceSenderIsOwnerFalse: true,
     });
     expect(requestHeartbeatMock).toHaveBeenCalledTimes(1);
     const [[heartbeatParams]] = requestHeartbeatMock.mock.calls as unknown as Array<
@@ -546,6 +551,7 @@ describe("emitExecSystemEvent", () => {
     expect(enqueueSystemEventMock).toHaveBeenCalledWith("Exec finished", {
       sessionKey: "global",
       contextKey: "exec:run-global",
+      forceSenderIsOwnerFalse: true,
     });
     const heartbeat = requireHeartbeatCall();
     expect(heartbeat.coalesceMs).toBe(0);
@@ -572,6 +578,7 @@ describe("emitExecSystemEvent", () => {
       sessionKey: "agent:main:subagent:abc-123",
       contextKey: "exec:run-sub",
       deliveryContext: undefined,
+      forceSenderIsOwnerFalse: true,
     });
     expect(requestHeartbeatMock).not.toHaveBeenCalled();
   });

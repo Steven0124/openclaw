@@ -774,6 +774,7 @@ describe("exec notifyOnExit", () => {
     expect(finished?.exitCode).toBe(0);
     expect(hasEvent).toBe(true);
     expect(queuedEvent?.text).toContain(sessionId.slice(0, 8));
+    expect(queuedEvent?.forceSenderIsOwnerFalse).toBe(true);
     expect(formatted).toBeUndefined();
   });
 

@@ -231,6 +231,7 @@ async function emitSlackModalLifecycleEvent(params: {
   enqueueSystemEvent(params.formatSystemEvent(eventPayload), {
     sessionKey: sessionRouting.sessionKey,
     contextKey: [params.contextPrefix, callbackId, viewId, userId].filter(Boolean).join(":"),
+    forceSenderIsOwnerFalse: true,
   });
 }
 

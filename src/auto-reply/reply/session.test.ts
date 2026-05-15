@@ -2873,7 +2873,7 @@ describe("drainFormattedSystemEvents", () => {
       });
 
       const expectedTimestampText = requireString(expectedTimestamp, "formatted timestamp");
-      expect(result).toContain(`System: [${expectedTimestampText}] Model switched.`);
+      expect(result?.content).toContain(`System: [${expectedTimestampText}] Model switched.`);
     } finally {
       resetSystemEventsForTest();
       vi.useRealTimers();
@@ -2892,8 +2892,8 @@ describe("drainFormattedSystemEvents", () => {
       isNewSession: true,
     });
 
-    expect(result).toContain("System: WhatsApp: linked");
-    for (const line of result!.split("\n")) {
+    expect(result?.content).toContain("System: WhatsApp: linked");
+    for (const line of result!.content.split("\n")) {
       expect(line).toMatch(/^System:/);
     }
   });

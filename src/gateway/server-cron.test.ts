@@ -847,8 +847,8 @@ describe("buildGatewayCronService", () => {
     }
   });
 
-  it("preserves event routing metadata when cron enqueues system events", () => {
-    const cfg = createCronConfig("server-cron-routing");
+  it("preserves explicit non-owner authority when cron enqueues system events", () => {
+    const cfg = createCronConfig("server-cron-non-owner");
     loadConfigMock.mockReturnValue(cfg);
 
     const state = buildGatewayCronService({
@@ -867,6 +867,7 @@ describe("buildGatewayCronService", () => {
                   agentId?: string;
                   sessionKey?: string;
                   contextKey?: string;
+                  forceSenderIsOwnerFalse?: boolean;
                 },
               ) => void;
             };
@@ -877,11 +878,13 @@ describe("buildGatewayCronService", () => {
       cronDeps?.enqueueSystemEvent?.("hello", {
         sessionKey: "discord:channel:ops",
         contextKey: "cron:test",
+        forceSenderIsOwnerFalse: true,
       });
 
       expect(enqueueSystemEventMock).toHaveBeenCalledWith("hello", {
         sessionKey: "agent:main:discord:channel:ops",
         contextKey: "cron:test",
+        forceSenderIsOwnerFalse: true,
       });
     } finally {
       state.cron.stop();

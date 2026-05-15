@@ -25,6 +25,10 @@ import {
   registerSessionBindingAdapter,
 } from "openclaw/plugin-sdk/conversation-runtime";
 import {
+  peekSystemEventEntries,
+  resetSystemEventsForTest,
+} from "openclaw/plugin-sdk/system-event-runtime";
+import {
   createDiscordMessage,
   createDiscordPreflightArgs,
   createGuildEvent,
@@ -339,6 +343,46 @@ describe("preflightDiscordMessage", () => {
     });
     handleDiscordDmCommandDecisionMock.mockReset();
     handleDiscordDmCommandDecisionMock.mockResolvedValue(undefined);
+    resetSystemEventsForTest();
+  });
+
+  it("queues Discord system messages as non-owner ingress", async () => {
+    const channelId = "guild-system-1";
+    const result = await runGuildPreflight({
+      channelId,
+      guildId: "guild-1",
+      message: createDiscordMessage({
+        id: "m-system-pin-1",
+        channelId,
+        content: "",
+        type: MessageType.ChannelPinnedMessage,
+        author: {
+          id: "user-1",
+          bot: false,
+          username: "Ada",
+        },
+      }),
+      discordConfig: {} as DiscordConfig,
+      guildEntries: {
+        "guild-1": {
+          channels: {
+            [channelId]: {
+              enabled: true,
+              requireMention: false,
+            },
+          },
+        },
+      },
+    });
+
+    expect(result).toBeNull();
+    expect(peekSystemEventEntries(`agent:main:discord:channel:${channelId}`)).toMatchObject([
+      {
+        text: "Discord system: Ada pinned a message in Guild One #general",
+        contextKey: `discord:system:${channelId}:m-system-pin-1`,
+        forceSenderIsOwnerFalse: true,
+      },
+    ]);
   });
 
   it("drops bound-thread bot system messages to prevent ACP self-loop", async () => {

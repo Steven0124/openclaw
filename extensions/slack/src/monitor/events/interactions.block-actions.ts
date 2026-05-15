@@ -783,6 +783,7 @@ function enqueueSlackBlockActionEvent(params: {
   const queued = enqueueSystemEvent(params.formatSystemEvent(eventPayload), {
     sessionKey,
     contextKey: contextParts.join(":"),
+    forceSenderIsOwnerFalse: true,
     deliveryContext: {
       channel: "slack",
       to:

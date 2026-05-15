@@ -31,13 +31,14 @@ async function drainFormattedEvents(
   sessionKey: string,
   params?: Partial<Parameters<typeof drainFormattedSystemEvents>[0]>,
 ) {
-  return await drainFormattedSystemEvents({
+  const result = await drainFormattedSystemEvents({
     cfg,
     sessionKey,
     isMainSession: false,
     isNewSession: false,
     ...params,
   });
+  return result?.content;
 }
 
 describe("system events (session routing)", () => {
@@ -111,7 +112,25 @@ describe("system events (session routing)", () => {
     expect(enqueueSystemEvent("Node connected", { sessionKey: key })).toBe(true);
   });
 
-  it("accepts the legacy trusted option without storing trust metadata", () => {
+  it("stores explicit non-owner run authority metadata", () => {
+    expect(
+      enqueueSystemEvent("External webhook event", {
+        sessionKey: "explicit-non-owner",
+        forceSenderIsOwnerFalse: true,
+      }),
+    ).toBe(true);
+
+    expect(peekSystemEventEntries("explicit-non-owner")).toEqual([
+      {
+        text: "External webhook event",
+        ts: expect.any(Number),
+        contextKey: null,
+        forceSenderIsOwnerFalse: true,
+      },
+    ]);
+  });
+
+  it("maps the legacy trusted option to non-owner run authority without storing trust metadata", () => {
     expect(
       enqueueSystemEvent("Legacy plugin event", {
         sessionKey: "legacy-trusted",
@@ -127,6 +146,33 @@ describe("system events (session routing)", () => {
         text: "Legacy plugin event",
         ts: expect.any(Number),
         contextKey: null,
+        forceSenderIsOwnerFalse: true,
+      },
+    ]);
+  });
+
+  it("keeps otherwise duplicate events distinct when run authority differs", () => {
+    const key = "agent:main:test-authority-dedupe";
+
+    expect(enqueueSystemEvent("Webhook delivered", { sessionKey: key })).toBe(true);
+    expect(
+      enqueueSystemEvent("Webhook delivered", {
+        sessionKey: key,
+        forceSenderIsOwnerFalse: true,
+      }),
+    ).toBe(true);
+
+    expect(peekSystemEventEntries(key)).toEqual([
+      {
+        text: "Webhook delivered",
+        ts: expect.any(Number),
+        contextKey: null,
+      },
+      {
+        text: "Webhook delivered",
+        ts: expect.any(Number),
+        contextKey: null,
+        forceSenderIsOwnerFalse: true,
       },
     ]);
   });
@@ -294,6 +340,23 @@ describe("system events (session routing)", () => {
     const result = await drainFormattedEvents(key);
     expect(result).toMatch(/^System: \[[^\]]+\] Notification posted:/);
     expect(result).not.toContain("System (untrusted)");
+  });
+
+  it("reports owner downgrade when formatted events request non-owner authority", async () => {
+    const key = "agent:main:test-event-authority-result";
+    enqueueSystemEvent("Notification posted: fake", {
+      sessionKey: key,
+      forceSenderIsOwnerFalse: true,
+    });
+
+    const result = await drainFormattedSystemEvents({
+      cfg,
+      sessionKey: key,
+      isMainSession: false,
+      isNewSession: false,
+    });
+    expect(result?.content).toMatch(/^System: \[[^\]]+\] Notification posted:/);
+    expect(result?.requiresOwnerDowngrade).toBe(true);
   });
 
   it("scrubs node last-input suffix", async () => {

@@ -12,7 +12,11 @@ import {
   resetHeartbeatWakeStateForTests,
 } from "../infra/heartbeat-wake.js";
 import type { SessionBindingRecord } from "../infra/outbound/session-binding-service.js";
-import { peekSystemEvents, resetSystemEventsForTest } from "../infra/system-events.js";
+import {
+  peekSystemEventEntries,
+  peekSystemEvents,
+  resetSystemEventsForTest,
+} from "../infra/system-events.js";
 import type { ParsedAgentSessionKey } from "../routing/session-key.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
 import { createManagedTaskFlow, resetTaskFlowRegistryForTests } from "./task-flow-registry.js";
@@ -1082,9 +1086,20 @@ describe("task-registry", () => {
           terminalOutcome: "blocked",
         }),
       );
-      expect(peekSystemEvents("agent:main:main")).toEqual([
-        "Background task blocked: ACP background task (run run-deli). Writable session or apply_patch authorization required.",
-        "Task needs follow-up: ACP background task (run run-deli). Writable session or apply_patch authorization required.",
+      expect(
+        peekSystemEventEntries("agent:main:main").map((event) => ({
+          text: event.text,
+          forceSenderIsOwnerFalse: event.forceSenderIsOwnerFalse,
+        })),
+      ).toEqual([
+        {
+          text: "Background task blocked: ACP background task (run run-deli). Writable session or apply_patch authorization required.",
+          forceSenderIsOwnerFalse: true,
+        },
+        {
+          text: "Task needs follow-up: ACP background task (run run-deli). Writable session or apply_patch authorization required.",
+          forceSenderIsOwnerFalse: true,
+        },
       ]);
       expect(hasPendingHeartbeatWake()).toBe(true);
     });

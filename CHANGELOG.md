@@ -15,7 +15,7 @@ Docs: https://docs.openclaw.ai
 - Control UI/WebChat: add a persisted auto-scroll mode selector so users can keep the current near-bottom behavior, always follow streaming output, or turn automatic streaming scroll off and use the New messages button manually. Fixes #7648 and #81287. Thanks @BunsDev.
 - ACP: add `acp.fallbacks` so ACP turns can try configured backup runtime backends when the primary backend is unavailable before any output is emitted. (#69542) Thanks @kaseonedge.
 - Gateway/startup: add owner-level startup trace attribution for auth, plugin loading, lookup counts, and plugin sidecar services. (#81738) Thanks @samzong.
-- System events: stop storing or reading queued-event trust metadata, remove its OpenGrep enforcement rule, and keep queued runtime context on the default `System:` prompt prefix while legacy `trusted` options are ignored. (#81729) Thanks @jesse-merhi.
+- System events: stop rendering queued-event trust labels, remove their OpenGrep enforcement rule, and keep explicit non-owner run authority separate from the default `System:` prompt prefix. (#81729) Thanks @jesse-merhi.
 
 ### Fixes
 

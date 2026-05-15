@@ -1543,6 +1543,18 @@ export async function runHeartbeatOnce(opts: {
     }
     runSessionKey = isolatedSessionKey;
   }
+  const activeSessionPendingEventEntries =
+    runSessionKey === sessionKey
+      ? preflight.pendingEventEntries
+      : peekSystemEventEntries(runSessionKey);
+  const hasNonOwnerInspectedEvents =
+    preflight.shouldInspectPendingEvents &&
+    preflight.pendingEventEntries.some((event) => event.forceSenderIsOwnerFalse === true);
+  const hasNonOwnerActiveSessionEvents = activeSessionPendingEventEntries.some(
+    (event) => event.forceSenderIsOwnerFalse === true,
+  );
+  const hasNonOwnerPendingEvents = hasNonOwnerInspectedEvents || hasNonOwnerActiveSessionEvents;
+
   // Update task last run times AFTER successful heartbeat completion
   const updateTaskTimestamps = async () => {
     if (!preflight.tasks || preflight.tasks.length === 0) {
@@ -1592,9 +1604,9 @@ export async function runHeartbeatOnce(opts: {
     MessageThreadId: delivery.threadId,
     Provider: hasExecCompletion ? "exec-event" : hasCronEvents ? "cron-event" : "heartbeat",
     SessionKey: runSessionKey,
-    // Exec completion turns are explicit event-triggered non-owner runs. This is
-    // independent of queued system-event trust metadata, which is no longer read.
-    ...(hasExecCompletion ? { ForceSenderIsOwnerFalse: true } : {}),
+    // Event-triggered non-owner runs use explicit runtime authority metadata,
+    // not model-visible system-event trust labels.
+    ...(hasExecCompletion || hasNonOwnerPendingEvents ? { ForceSenderIsOwnerFalse: true } : {}),
   };
   if (!visibility.showAlerts && !visibility.showOk && !visibility.useIndicator) {
     emitHeartbeatEvent({

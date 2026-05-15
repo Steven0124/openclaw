@@ -259,6 +259,34 @@ describe("Ghost reminder bug (issue #13317)", () => {
     expect(sendTelegram).not.toHaveBeenCalled();
   };
 
+  const expectQueuedEventSetsOwnerOverride = async (params: {
+    tmpPrefix: string;
+    reason: "hook:wake" | "interval";
+    isolatedSession?: boolean;
+  }): Promise<void> => {
+    const { result, sendTelegram, calledCtx } = await runHeartbeatCase({
+      tmpPrefix: params.tmpPrefix,
+      replyText: "Handled internally",
+      reason: params.reason,
+      target: "none",
+      isolatedSession: params.isolatedSession,
+      enqueue: (sessionKey) => {
+        enqueueSystemEvent("GitHub issue opened: external webhook content", {
+          sessionKey,
+          forceSenderIsOwnerFalse: true,
+        });
+      },
+    });
+
+    expect(result.status).toBe("ran");
+    expect(calledCtx?.Provider).toBe("heartbeat");
+    if (params.isolatedSession === true) {
+      expect(calledCtx?.SessionKey).toContain(":heartbeat");
+    }
+    expect(calledCtx?.ForceSenderIsOwnerFalse).toBe(true);
+    expect(sendTelegram).not.toHaveBeenCalled();
+  };
+
   it("does not use CRON_EVENT_PROMPT when only a HEARTBEAT_OK event is present", async () => {
     const { result, sendTelegram, calledCtx, replyCallCount } = await runHeartbeatCase({
       tmpPrefix: "openclaw-ghost-",
@@ -499,9 +527,23 @@ describe("Ghost reminder bug (issue #13317)", () => {
     });
   });
 
+  it("sets an owner override for hook:wake system event runs with explicit non-owner authority", async () => {
+    await expectQueuedEventSetsOwnerOverride({
+      tmpPrefix: "openclaw-hook-event-non-owner-",
+      reason: "hook:wake",
+    });
+  });
+
   it("does not set an owner override for interval system event runs", async () => {
     await expectQueuedEventDoesNotSetOwnerOverride({
       tmpPrefix: "openclaw-interval-event-",
+      reason: "interval",
+    });
+  });
+
+  it("sets an owner override for interval system event runs with explicit non-owner authority", async () => {
+    await expectQueuedEventSetsOwnerOverride({
+      tmpPrefix: "openclaw-interval-event-non-owner-",
       reason: "interval",
     });
   });
