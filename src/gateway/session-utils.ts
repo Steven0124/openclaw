@@ -727,6 +727,7 @@ export function loadSessionEntry(sessionKey: string) {
   const store: Record<string, SessionEntry> = {};
   const entry = getSessionEntry({
     agentId: target.agentId,
+    path: target.databasePath,
     sessionKey: target.canonicalKey,
   });
   if (entry) {

@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../../../agents/defaults.js";
 import { resolveModelRuntimePolicy } from "../../../agents/model-runtime-policy.js";
 import { openAIProviderUsesCodexRuntimeByDefault } from "../../../agents/openai-codex-routing.js";
@@ -2191,9 +2190,11 @@ export async function maybeRepairCodexSessionRoutes(params: {
   if (!params.shouldRepair) {
     const stale = targets.flatMap((target) => {
       const store = Object.fromEntries(
-        listSessionEntries({ agentId: target.agentId, env: params.env }).map(
-          ({ sessionKey, entry }) => [sessionKey, entry],
-        ),
+        listSessionEntries({
+          agentId: target.agentId,
+          env: params.env,
+          path: target.databasePath,
+        }).map(({ sessionKey, entry }) => [sessionKey, entry]),
       );
       const sessionKeys = scanCodexSessionStoreRoutes(store);
       return sessionKeys.map((sessionKey) => `${target.agentId}:${sessionKey}`);
@@ -2219,9 +2220,11 @@ export async function maybeRepairCodexSessionRoutes(params: {
   let repairedSessions = 0;
   for (const target of targets) {
     const store = Object.fromEntries(
-      listSessionEntries({ agentId: target.agentId, env: params.env }).map(
-        ({ sessionKey, entry }) => [sessionKey, entry],
-      ),
+      listSessionEntries({
+        agentId: target.agentId,
+        env: params.env,
+        path: target.databasePath,
+      }).map(({ sessionKey, entry }) => [sessionKey, entry]),
     );
     const staleSessionKeys = scanCodexSessionStoreRoutes(store);
     if (staleSessionKeys.length === 0) {
@@ -2237,6 +2240,7 @@ export async function maybeRepairCodexSessionRoutes(params: {
         upsertSessionEntry({
           agentId: target.agentId,
           env: params.env,
+          path: target.databasePath,
           sessionKey,
           entry,
         });
