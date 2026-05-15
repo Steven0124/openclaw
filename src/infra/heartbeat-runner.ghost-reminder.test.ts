@@ -232,7 +232,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
     );
   };
 
-  const expectQueuedEventDoesNotSetSenderOwnership = async (params: {
+  const expectQueuedEventDoesNotSetOwnerOverride = async (params: {
     tmpPrefix: string;
     reason: "hook:wake" | "interval";
     isolatedSession?: boolean;
@@ -244,7 +244,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
       target: "none",
       isolatedSession: params.isolatedSession,
       enqueue: (sessionKey) => {
-        enqueueSystemEvent("GitHub issue opened: untrusted webhook content", {
+        enqueueSystemEvent("GitHub issue opened: external webhook content", {
           sessionKey,
         });
       },
@@ -492,21 +492,21 @@ describe("Ghost reminder bug (issue #13317)", () => {
     expect(sendTelegram).not.toHaveBeenCalled();
   });
 
-  it("keeps default sender ownership for hook:wake system event runs", async () => {
-    await expectQueuedEventDoesNotSetSenderOwnership({
+  it("does not set an owner override for hook:wake system event runs", async () => {
+    await expectQueuedEventDoesNotSetOwnerOverride({
       tmpPrefix: "openclaw-hook-event-",
       reason: "hook:wake",
     });
   });
 
-  it("keeps default sender ownership for interval system event runs", async () => {
-    await expectQueuedEventDoesNotSetSenderOwnership({
+  it("does not set an owner override for interval system event runs", async () => {
+    await expectQueuedEventDoesNotSetOwnerOverride({
       tmpPrefix: "openclaw-interval-event-",
       reason: "interval",
     });
   });
 
-  it("keeps default sender ownership for internal mode events during heartbeat runs", async () => {
+  it("does not set an owner override for internal mode events during heartbeat runs", async () => {
     const { result, calledCtx } = await runHeartbeatCase({
       tmpPrefix: "openclaw-heartbeat-internal-mode-",
       replyText: "Handled internally",
@@ -529,16 +529,16 @@ describe("Ghost reminder bug (issue #13317)", () => {
     expect(calledCtx?.ForceSenderIsOwnerFalse).toBeUndefined();
   });
 
-  it("keeps default sender ownership for hook:wake events with isolated sessions", async () => {
-    await expectQueuedEventDoesNotSetSenderOwnership({
+  it("does not set an owner override for hook:wake events with isolated sessions", async () => {
+    await expectQueuedEventDoesNotSetOwnerOverride({
       tmpPrefix: "openclaw-hook-event-isolated-",
       reason: "hook:wake",
       isolatedSession: true,
     });
   });
 
-  it("keeps default sender ownership for isolated interval runs with only base-session events", async () => {
-    await expectQueuedEventDoesNotSetSenderOwnership({
+  it("does not set an owner override for isolated interval runs with only base-session events", async () => {
+    await expectQueuedEventDoesNotSetOwnerOverride({
       tmpPrefix: "openclaw-interval-event-isolated-",
       reason: "interval",
       isolatedSession: true,
