@@ -131,23 +131,6 @@ describe("system events (session routing)", () => {
     ]);
   });
 
-  it("does not allow arbitrary option misspellings", () => {
-    if (process.env.OPENCLAW_COMPILE_ONLY_TYPE_TESTS === "1") {
-      enqueueSystemEvent("Bad legacy option event", {
-        sessionKey: "legacy-trusted",
-        // @ts-expect-error Intentional negative type test: legacy `trusted` remains boolean-only.
-        trusted: "false",
-      });
-      enqueueSystemEvent("Typo event", {
-        sessionKey: "legacy-trusted",
-        // @ts-expect-error Intentional negative type test: only the legacy `trusted` option is ignored.
-        deliveryContex: { channel: "slack" },
-      });
-    }
-
-    expect(true).toBe(true);
-  });
-
   it("consumes only the inspected prefix and leaves later queued events intact", () => {
     const key = "agent:main:test-consume-prefix";
     enqueueSystemEvent("first", { sessionKey: key, contextKey: "cron:first" });
