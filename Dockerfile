@@ -84,11 +84,11 @@ RUN set -eux; \
         exit 0; \
       fi; \
       echo "matrix-sdk-crypto native addon missing; retrying download (${attempt}/5)"; \
-      node /app/node_modules/@matrix-org/matrix-sdk-crypto-nodejs/download-lib.js || true; \
+      timeout 60 node /app/node_modules/@matrix-org/matrix-sdk-crypto-nodejs/download-lib.js || true; \
       sleep $((attempt * 2)); \
     done; \
     find /app/node_modules -name "matrix-sdk-crypto*.node" 2>/dev/null | grep -q . || \
-      (echo "ERROR: matrix-sdk-crypto native addon missing after retries" >&2 && exit 1)
+      echo "WARNING: matrix-sdk-crypto native addon missing; Matrix plugin will be unavailable"
 
 COPY . .
 
