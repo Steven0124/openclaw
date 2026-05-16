@@ -8,10 +8,6 @@ concurrency:
   group: render-docker-build-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -34,6 +30,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/openclaw:latest
+          tags: ghcr.io/steven0124/openclaw:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
